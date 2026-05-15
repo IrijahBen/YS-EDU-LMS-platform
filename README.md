@@ -1,6 +1,6 @@
-# 🎓 LearnHub — Full-Stack LMS Platform
+# 🎓 YS EDU — Educational Consultancy & CBT Platform
 
-A production-ready Learning Management System built with React, Node.js, MongoDB, and Stripe.
+A production-ready, full-stack platform built for **Yoj Simcha Educational Consultancy**. It features a powerful Computer Based Testing (CBT) engine for mock exams (WAEC, NECO, UTME), global question bank management, and comprehensive study abroad service routing.
 
 ---
 
@@ -8,27 +8,27 @@ A production-ready Learning Management System built with React, Node.js, MongoDB
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18 + Vite, Tailwind CSS, Framer Motion, Zustand |
-| Backend | Node.js, Express.js, MongoDB + Mongoose |
-| Auth | JWT + Refresh Tokens, bcryptjs |
-| Payments | Stripe Checkout |
-| Media | Cloudinary (images + videos) |
-| Real-time | Socket.io |
-| Email | Nodemailer |
-| PDF | PDFKit (certificates) |
+| **Frontend** | React 18 + Vite, Tailwind CSS, Framer Motion, Zustand |
+| **Backend** | Node.js, Express.js, MongoDB + Mongoose |
+| **Auth** | JWT + Refresh Tokens, bcryptjs |
+| **Payments** | Stripe Checkout |
+| **Media** | Cloudinary (images + videos) |
+| **Real-time** | Socket.io (Notifications) |
+| **Email** | Nodemailer |
+| **PDF** | PDFKit (Certificates & Results) |
 
 ---
 
 ## 📁 Project Structure
 
-```
-LMS/
+```text
+YS-EDU-LMS/
 ├── backend/
 │   ├── src/
 │   │   ├── config/         # DB, Cloudinary config
 │   │   ├── controllers/    # Route handlers
 │   │   ├── middleware/     # Auth, error handling, validation
-│   │   ├── models/         # Mongoose schemas
+│   │   ├── models/         # Mongoose schemas (User, Test, Question)
 │   │   ├── routes/         # Express routers
 │   │   ├── services/       # Business logic
 │   │   └── utils/          # Helpers (email, tokens, PDF)
@@ -37,19 +37,19 @@ LMS/
 │
 └── frontend/
     ├── src/
-    │   ├── components/     # Reusable UI components
-    │   │   ├── common/     # CourseCard, StarRating, Loaders
-    │   │   └── layout/     # Navbar, Footer, DashboardLayout
-    │   ├── pages/          # All page components
-    │   │   ├── auth/       # Login, Register, ForgotPassword
-    │   │   ├── student/    # Dashboard, LearnCourse, Certificates
-    │   │   ├── instructor/ # Dashboard, CourseEditor, Earnings
-    │   │   └── admin/      # Dashboard, Users, Courses
+    │   ├── components/     # Reusable UI (CourseCard, Loaders)
+    │   │   └── layout/     # MainLayout, DashboardLayout
+    │   ├── pages/          # Page components
+    │   │   ├── auth/       # Login, Register, Password Reset
+    │   │   ├── student/    # TestEngine, Progress, Certificates
+    │   │   ├── instructor/ # TestManagement, CreateTest, Analytics
+    │   │   └── admin/      # QuestionBank, ActiveTests, Users
     │   ├── services/       # API service layer (axios)
     │   ├── store/          # Zustand state management
-    │   └── lib/            # Utilities
+    │   └── lib/            # Utility functions
     ├── .env.example
     └── package.json
+
 ```
 
 ---
@@ -57,32 +57,33 @@ LMS/
 ## ⚙️ Setup & Installation
 
 ### Prerequisites
-- Node.js 18+
-- MongoDB Atlas account
-- Cloudinary account
-- Stripe account
+
+* Node.js 18+
+* MongoDB Atlas account
+* Cloudinary account
+* Stripe account
 
 ### 1. Clone & Install
 
 ```bash
-# Backend
+# Backend Setup
 cd backend
 cp .env.example .env
-# Fill in your .env values
 npm install
 npm run dev
 
-# Frontend (new terminal)
+# Frontend Setup (in a new terminal)
 cd frontend
 cp .env.example .env
-# Fill in your .env values
 npm install
 npm run dev
+
 ```
 
 ### 2. Environment Variables
 
 **Backend `.env`:**
+
 ```env
 PORT=5000
 NODE_ENV=development
@@ -95,108 +96,79 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your@email.com
 EMAIL_PASS=your_app_password
-EMAIL_FROM=LearnHub <noreply@learnhub.com>
+EMAIL_FROM=YS EDU <noreply@ysedu.com>
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 CLIENT_URL=http://localhost:5173
+
 ```
 
 **Frontend `.env`:**
+
 ```env
+# Point this to localhost in dev, and Render in prod
 VITE_API_URL=http://localhost:5000/api
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+
 ```
 
 ---
 
-## 🌐 API Endpoints
+## 🌐 Core API Services
 
-### Auth
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register user |
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/logout` | Logout |
-| GET | `/api/auth/me` | Get current user |
-| GET | `/api/auth/verify-email/:token` | Verify email |
-| POST | `/api/auth/forgot-password` | Request reset |
-| PUT | `/api/auth/reset-password/:token` | Reset password |
+Our frontend utilizes a modular API service architecture (`src/services/api.js`):
 
-### Courses
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/courses` | List courses (with filters) |
-| GET | `/api/courses/:slug` | Get course details |
-| POST | `/api/courses` | Create course (instructor) |
-| PUT | `/api/courses/:id` | Update course |
-| DELETE | `/api/courses/:id` | Delete course |
-| PUT | `/api/courses/:id/publish` | Toggle publish |
-
-### Enrollments
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/enrollments/:courseId` | Enroll (free) |
-| GET | `/api/enrollments/:courseId/progress` | Get progress |
-| PUT | `/api/enrollments/:courseId/progress` | Update progress |
-| GET/POST | `/api/enrollments/:courseId/notes` | Notes |
-
-### Payments
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/payments/checkout/:courseId` | Create Stripe session |
-| GET | `/api/payments/verify/:sessionId` | Verify payment |
-| POST | `/api/payments/webhook` | Stripe webhook |
+| Service | Primary Function |
+| --- | --- |
+| `authService` | Login, Register, Password resets, Email verification |
+| `testService` | Instructor creation and management of CBT Mock Exams |
+| `questionService` | Admin management of the Global Question Bank |
+| `adminService` | Platform-wide oversight of all users, tests, and analytics |
+| `enrollmentService` | Student exam registration and progress tracking |
 
 ---
 
-## 🚀 Deployment
+## 🚀 Deployment Architecture
 
-### Frontend → Vercel
-```bash
-cd frontend
-npm run build
-# Deploy dist/ to Vercel
-# Set VITE_API_URL to your backend URL
-```
+This platform utilizes a decoupled deployment strategy to bypass serverless timeouts during heavy backend operations (like PDF generation).
 
-### Backend → Render/Railway
-```bash
-# Set all environment variables in dashboard
-# Start command: npm start
-# Build command: npm install
-```
+### 1. Backend → Render.com
 
-### Database → MongoDB Atlas
-1. Create a free cluster at mongodb.com/atlas
-2. Add your IP to the allowlist (or 0.0.0.0/0 for all)
-3. Create a database user
-4. Copy the connection string to MONGODB_URI
+1. Connect your GitHub repository to Render as a **Web Service**.
+2. Set Root Directory to `backend`.
+3. Build Command: `npm install`
+4. Start Command: `npm start`
+5. *Copy the generated Render URL (e.g., `https://ys-edu-api.onrender.com`).*
+
+### 2. Frontend → Vercel
+
+1. Import your repository into Vercel.
+2. Set Root Directory to `frontend`.
+3. Add the Environment Variable: `VITE_API_URL` = `https://ys-edu-api.onrender.com/api`
+4. Deploy. Vercel automatically handles the Vite build process.
 
 ---
 
 ## 🔑 Key Features
 
-- ✅ JWT Authentication with refresh tokens
-- ✅ Role-based access (Student / Instructor / Admin)
-- ✅ Email verification & password reset
-- ✅ Course creation with sections & lessons
-- ✅ Video upload via Cloudinary
-- ✅ Progress tracking with resume playback
-- ✅ Quiz system with auto-grading
-- ✅ PDF certificate generation
-- ✅ Stripe payment integration
-- ✅ Real-time notifications via Socket.io
-- ✅ Discussion forums
-- ✅ In-video notes
-- ✅ Dark/light mode
-- ✅ Fully responsive design
-- ✅ Admin dashboard with analytics
+* ✅ **Advanced CBT Engine:** Time-bound mock exams mimicking UTME, WAEC, and NECO interfaces.
+* ✅ **Global Question Bank:** Admins can pool thousands of questions for instructors to use.
+* ✅ **Role-Based Dashboards:** Isolated, secure environments for Students, Instructors, and Admins.
+* ✅ **Educational Consultancy Routing:** Dedicated service pages for Study Abroad, Visa Processing, and Scholarships.
+* ✅ **Automated Grading & Analytics:** Instant test results and historical performance tracking.
+* ✅ **Verifiable Certificates:** Auto-generated PDF certificates with unique verification IDs.
+* ✅ **Secure Payments:** Stripe integration for premium mock exam access.
+* ✅ **Dark/Light Mode:** Fully responsive, accessible, and modern UI.
 
 ---
 
-## 📄 License
+## 📄 License & Copyright
 
-MIT License — free to use for personal and commercial projects.
+© Yoj Simcha Educational Consultancy. All rights reserved.
+
+```
+
+```
