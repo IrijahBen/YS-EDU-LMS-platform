@@ -28,11 +28,16 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup
+// ─── Socket.io Setup (CORS Fixed) ─────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'https://ys-edu-lms-platform.vercel.app',
-    methods: ['GET', 'POST'],
+    origin: [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'https://ys-edu-lms-platform.vercel.app',
+        process.env.CLIENT_URL
+    ].filter(Boolean), // Filters out undefined if CLIENT_URL is empty
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   },
 });
@@ -80,32 +85,18 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// CORS — allow both localhost and any origin in development
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  // Allow all vercel.app subdomains for deployment
-  /\.vercel\.app$/,
-];
-
+// ─── THE BULLETPROOF CORS SETUP ───────────────────────────────────────────────
+// No more custom callback functions. Just a strict, explicit list of allowed URLs.
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    // Check string origins and regex patterns
-    const allowed = allowedOrigins.some((o) =>
-      typeof o === 'string' ? o === origin : o.test(origin)
-    );
-    if (allowed || process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://ys-edu-lms-platform.vercel.app', // Your exact live Vercel URL
+    process.env.CLIENT_URL
+  ].filter(Boolean), 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
 
 // Handle preflight requests
@@ -158,7 +149,7 @@ app.use('/api/discussions', discussionRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: '🎓 LearnHub API',
+    message: '🎓 YS EDU API',
     version: '1.0.0',
     docs: '/api/health',
   });
