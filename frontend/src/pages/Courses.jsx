@@ -16,7 +16,6 @@ const CATEGORIES = [
     'History', 'Fine Arts', 'French', 'Yoruba', 'Igbo', 'Hausa', 'Music'
 ];
 
-// UPDATED: Replaced JSS/SS1 with Major Exams
 const EXAM_LEVELS = ['UTME (JAMB)', 'WAEC', 'NECO', 'GCE', 'Post-UTME', 'All Levels'];
 
 const SORT_OPTIONS = [
@@ -26,10 +25,8 @@ const SORT_OPTIONS = [
 
 export default function Courses() {
     const [searchParams, setSearchParams] = useSearchParams();
-    // Notice: removed 'rating' from filters
     const { courses, isLoading, pagination, filters, setFilters, fetchCourses } = useCourseStore();
-
-    // Default to showing filters on desktop, hidden on mobile
+    
     const [showFilters, setShowFilters] = useState(window.innerWidth >= 1024);
     const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
 
@@ -38,8 +35,7 @@ export default function Courses() {
         const category = searchParams.get('category') || '';
         setFilters({ search, category });
         setLocalSearch(search);
-
-        // Handle window resize to auto-toggle sidebar
+        
         const handleResize = () => {
             if (window.innerWidth >= 1024) setShowFilters(true);
         };
@@ -68,7 +64,8 @@ export default function Courses() {
 
     const clearFilter = (key) => setFilters({ [key]: '' });
 
-    const activeFilters = Object.entries(filters).filter(([k, v]) => v && k !== 'sort' && k !== 'search' && k !== 'isFree');
+    // Safely generate active filters
+    const activeFilters = Object.entries(filters || {}).filter(([k, v]) => v && k !== 'sort' && k !== 'search' && k !== 'isFree');
 
     return (
         <div className="page-container py-8 mt-4">
@@ -76,7 +73,7 @@ export default function Courses() {
             <div className="mb-6">
                 <h1 className="text-3xl font-heading font-bold mb-1 text-[#0A3D62] dark:text-white">Subjects & Mock Exams</h1>
                 <p className="text-muted-foreground">
-                    {pagination.total > 0 ? `${pagination.total.toLocaleString()} study materials available` : 'Explore our exam prep catalog'}
+                    {(pagination?.total || 0) > 0 ? `${pagination.total.toLocaleString()} study materials available` : 'Explore our exam prep catalog'}
                 </p>
             </div>
 
@@ -94,7 +91,7 @@ export default function Courses() {
                 </div>
                 <div className="flex gap-2">
                     <select
-                        value={filters.sort || 'newest'}
+                        value={filters?.sort || 'newest'}
                         onChange={(e) => setFilters({ sort: e.target.value })}
                         className="input-field w-auto text-sm border-gray-200 dark:border-gray-800"
                     >
@@ -135,8 +132,8 @@ export default function Courses() {
             )}
 
             <div className="flex flex-col md:flex-row gap-8 items-start">
-
-                {/* ── Sticky Sidebar Filters (STRICT WIDTH) ─────────────────────────────── */}
+                
+                {/* ── Sticky Sidebar Filters ─────────────────────────────── */}
                 <AnimatePresence>
                     {showFilters && (
                         <motion.aside
@@ -147,7 +144,7 @@ export default function Courses() {
                             className="w-full md:w-[280px] shrink-0"
                         >
                             <div className="space-y-6 sticky top-24">
-
+                                
                                 {/* Category Filter */}
                                 <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                                     <h3 className="font-semibold text-sm mb-3 text-gray-900 dark:text-white uppercase tracking-wider">Subject</h3>
@@ -157,7 +154,7 @@ export default function Courses() {
                                                 <input
                                                     type="radio"
                                                     name="category"
-                                                    checked={filters.category === cat}
+                                                    checked={filters?.category === cat}
                                                     onChange={() => setFilters({ category: cat })}
                                                     className="accent-[#0A3D62] w-4 h-4 shrink-0"
                                                 />
@@ -176,7 +173,7 @@ export default function Courses() {
                                                 <input
                                                     type="radio"
                                                     name="level"
-                                                    checked={filters.level === lvl}
+                                                    checked={filters?.level === lvl}
                                                     onChange={() => setFilters({ level: lvl })}
                                                     className="accent-[#0A3D62] w-4 h-4 shrink-0"
                                                 />
@@ -197,7 +194,8 @@ export default function Courses() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)}
                         </div>
-                    ) : courses.length === 0 ? (
+                    ) : (!courses || courses.length === 0) ? (
+                        // ✅ THE FIX: Safely checks if courses is null/undefined before checking length
                         <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 text-center px-4 shadow-sm">
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
                                 <Search className="w-10 h-10 text-gray-400" />
@@ -207,7 +205,7 @@ export default function Courses() {
                                 We couldn't find any study materials matching your current filters. Try adjusting your search criteria or clearing filters.
                             </p>
                             {activeFilters.length > 0 && (
-                                <button
+                                <button 
                                     onClick={() => setFilters({ category: '', level: '', minPrice: '', maxPrice: '', isFree: false, search: '' })}
                                     className="mt-8 px-6 py-3 bg-[#0A3D62] text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 hover:scale-105 transition-transform"
                                 >
@@ -218,22 +216,24 @@ export default function Courses() {
                     ) : (
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {courses.map((course) => (
+                                {/* ✅ THE FIX: Added ?.map to ensure it doesn't crash if it's undefined */}
+                                {courses?.map((course) => (
                                     <CourseCard key={course._id} course={course} />
                                 ))}
                             </div>
 
                             {/* Pagination */}
-                            {pagination.pages > 1 && (
+                            {(pagination?.pages || 0) > 1 && (
                                 <div className="flex justify-center items-center gap-2 mt-16 pb-8">
                                     {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
                                         <button
                                             key={page}
                                             onClick={() => handlePageChange(page)}
-                                            className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${page === pagination.currentPage
-                                                    ? 'bg-[#0A3D62] text-white shadow-lg shadow-blue-900/20 scale-110'
-                                                    : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-[#0A3D62]'
-                                                }`}
+                                            className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
+                                                page === pagination.currentPage
+                                                ? 'bg-[#0A3D62] text-white shadow-lg shadow-blue-900/20 scale-110'
+                                                : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-[#0A3D62]'
+                                            }`}
                                         >
                                             {page}
                                         </button>
