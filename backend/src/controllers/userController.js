@@ -296,7 +296,26 @@ exports.getPlatformAnalytics = asyncHandler(async (req, res, next) => {
     { $sort: { '_id.year': 1, '_id.month': 1 } },
   ]);
 
-  exports.approveUser = asyncHandler(async (req, res, next) => {
+  // RESTORED: This response was hijacked by the rejectUser function previously. 
+  res.status(200).json({
+    success: true,
+    stats: {
+      totalUsers,
+      totalStudents,
+      totalInstructors,
+      totalCourses,
+      publishedCourses,
+      totalRevenue: totalRevenue[0]?.total || 0,
+    },
+    recentUsers,
+    monthlySignups,
+  });
+});
+
+// @desc    Approve a pending user
+// @route   PUT /api/users/:id/approve
+// @access  Private/Admin
+exports.approveUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
   if (!user) {
@@ -329,17 +348,9 @@ exports.rejectUser = asyncHandler(async (req, res, next) => {
 
   await User.findByIdAndDelete(req.params.id);
 
+  // RESTORED: Proper rejection response message
   res.status(200).json({
     success: true,
-    stats: {
-      totalUsers,
-      totalStudents,
-      totalInstructors,
-      totalCourses,
-      publishedCourses,
-      totalRevenue: totalRevenue[0]?.total || 0,
-    },
-    recentUsers,
-    monthlySignups,
+    message: 'User application rejected and removed'
   });
 });
