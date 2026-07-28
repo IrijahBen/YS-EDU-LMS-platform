@@ -47,7 +47,7 @@ export default function StudentDashboard() {
                     <p className="text-muted-foreground mt-1">Continue your learning journey</p>
                 </div>
                 <Link to="/courses" className="hidden sm:flex items-center gap-2 btn-primary text-sm">
-                    <BookOpen className="w-4 h-4" /> Browse Catalog
+                    <BookOpen className="w-4 h-4" /> Browse Browse CBT test
                 </Link>
             </div>
 
@@ -171,7 +171,7 @@ export default function StudentDashboard() {
                     <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-30" />
                     <h3 className="text-lg font-semibold mb-2">No enrollments yet</h3>
                     <p className="text-muted-foreground mb-6">Start your learning journey by enrolling in a course or practice test.</p>
-                    <Link to="/courses" className="btn-primary">Browse Catalog</Link>
+                    <Link to="/courses" className="btn-primary">Browse Browse CBT test</Link>
                 </div>
             )}
         </div>
