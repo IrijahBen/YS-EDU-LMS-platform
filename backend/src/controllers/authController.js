@@ -28,7 +28,18 @@ exports.register = asyncHandler(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
   }
 
-  sendTokenResponse(user, 201, res);
+  // Return success response without logging the user in
+  res.status(201).json({
+    success: true,
+    message: 'Registration successful. Your account is pending admin approval.',
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isApproved: user.isApproved
+    }
+  });
 });
 
 // @desc    Login user
@@ -49,6 +60,11 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   if (user.isBanned) {
     return next(new AppError(`Account suspended: ${user.banReason || 'Contact support'}`, 403));
+  }
+
+  // The Gatekeeper Check: Ensure admin has approved the account
+  if (!user.isApproved) {
+    return next(new AppError('Your account is currently pending admin approval. Please check back later.', 403));
   }
 
   user.lastLogin = Date.now();
