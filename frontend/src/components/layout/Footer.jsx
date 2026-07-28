@@ -44,7 +44,7 @@ export default function Footer() {
                         </Link>
                         <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm">
                             Empowering your Higher Education Journey with Expert Guidance. <br />
-                            <span className="italic">...wisdom nonstop</span>
+                            <span className="italic">...wisen nonstop</span>
                         </p>
 
                         {/* Added the full address here since it's quite long in the image */}
