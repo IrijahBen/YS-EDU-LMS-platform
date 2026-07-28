@@ -296,6 +296,39 @@ exports.getPlatformAnalytics = asyncHandler(async (req, res, next) => {
     { $sort: { '_id.year': 1, '_id.month': 1 } },
   ]);
 
+  exports.approveUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  if (user.isApproved) {
+    return next(new AppError('User is already approved', 400));
+  }
+
+  user.isApproved = true;
+  user.approvedAt = Date.now();
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: 'User approved successfully'
+  });
+});
+
+// @desc    Reject/Delete a pending user
+// @route   DELETE /api/users/:id/reject
+// @access  Private/Admin
+exports.rejectUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ _id: req.params.id, isApproved: false });
+
+  if (!user) {
+    return next(new AppError('Pending user not found', 404));
+  }
+
+  await User.findByIdAndDelete(req.params.id);
+
   res.status(200).json({
     success: true,
     stats: {
