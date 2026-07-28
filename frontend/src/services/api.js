@@ -82,6 +82,10 @@ export const userService = {
     updateUserRole: (id, role) => api.put(`/users/${id}/role`, { role }),
     deleteUser: (id) => api.delete(`/users/${id}`),
     getPlatformAnalytics: () => api.get('/users/admin/analytics'),
+    
+    // NEW: Admin Approval Routes
+    approveUser: (id) => api.put(`/users/${id}/approve`),
+    rejectUser: (id) => api.delete(`/users/${id}/reject`),
 };
 
 // ─── Course Services ──────────────────────────────────────────────────────────
