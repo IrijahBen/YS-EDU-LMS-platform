@@ -79,7 +79,7 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { label: 'Courses', href: '/courses' },
+    { label: 'CBT Mock Test', href: '/courses' },
     { label: 'About', href: '/about' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'Contact', href: '/contact' },
