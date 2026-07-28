@@ -81,6 +81,12 @@ const userSchema = new mongoose.Schema(
     isBanned: { type: Boolean, default: false },
     banReason: String,
     lastLogin: Date,
+    // Admin Approval Security
+    isApproved: { 
+      type: Boolean, 
+      default: false 
+    },
+    approvedAt: Date,
     // Preferences
     language: { type: String, default: 'en' },
     notifications: {
